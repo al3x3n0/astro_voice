@@ -43,7 +43,7 @@ KWSpotter::~KWSpotter() {
     }
 }
 
-void KWSpotter::detect(const std::vector<float>& samples) {
+bool KWSpotter::detect(const std::vector<float>& samples) {
     SherpaOnnxOnlineStreamAcceptWaveform(m_stream, m_sample_rate, samples.data(), samples.size());
     while (SherpaOnnxIsKeywordStreamReady(m_kws, m_stream)) {
         SherpaOnnxDecodeKeywordStream(m_kws, m_stream);
@@ -52,34 +52,12 @@ void KWSpotter::detect(const std::vector<float>& samples) {
             fprintf(stderr, "Detected keyword: %s\n", r->json);
             // Remember to reset the keyword stream
             SherpaOnnxResetKeywordStream(m_kws, m_stream);
+            return true;
         }
         SherpaOnnxDestroyKeywordResult(r);
     }
+    return false;
 }
 
 }
-
-/*
-  const SherpaOnnxKeywordSpotter *
-  if (!kws) {
-    fprintf(stderr, "Please check your config");
-    exit(-1);
-  }
-
-  fprintf(stderr,
-          "--Test pre-defined keywords from test_wavs/test_keywords.txt--\n");
-
-  const char *wav_filename =
-      "./sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01-mobile/"
-      "test_wavs/3.wav";
-
-  float tail_paddings[8000] = {0};  // 0.5 seconds
-
-  const SherpaOnnxWave *wave = SherpaOnnxReadWave(wav_filename);
-  if (wave == NULL) {
-    fprintf(stderr, "Failed to read %s\n", wav_filename);
-    exit(-1);
-  }
-
-*/
-  
+ 

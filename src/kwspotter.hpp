@@ -10,7 +10,7 @@ public:
     KWSpotter(int sample_rate);
     ~KWSpotter();
 
-    void detect(const std::vector<float>& samples);
+    bool detect(const std::vector<float>& samples);
 private:
     int m_sample_rate;
 

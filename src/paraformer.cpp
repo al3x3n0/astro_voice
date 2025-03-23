@@ -2,7 +2,7 @@
 
 namespace astro {
 
-Paraformer::Paraformer() {
+ParaformerSTT::ParaformerSTT() {
     
 
     // Paraformer config
@@ -28,20 +28,25 @@ Paraformer::Paraformer() {
     m_recognizer = SherpaOnnxCreateOfflineRecognizer(&recognizer_config);
 }
 
-Paraformer::~Paraformer() {
+ParaformerSTT::~ParaformerSTT() {
     if (m_recognizer) {
         SherpaOnnxDestroyOfflineRecognizer(m_recognizer);
     }
 }
 
-void Paraformer::detect(const std::vector<float>& samples) {
+std::string ParaformerSTT::transcribe(const std::vector<float>& samples) {
     auto stream = SherpaOnnxCreateOfflineStream(m_recognizer);
     SherpaOnnxAcceptWaveformOffline(stream, m_sample_rate, samples.data(), samples.size());
     SherpaOnnxDecodeOfflineStream(m_recognizer, stream);
     const SherpaOnnxOfflineRecognizerResult *result = SherpaOnnxGetOfflineStreamResult(stream);
+
+    std::string text = result->text;
     fprintf(stdout, "TEXT: %s\n", result->text);
+ 
     SherpaOnnxDestroyOfflineRecognizerResult(result);
     SherpaOnnxDestroyOfflineStream(stream);
+
+    return text;
 }
 
-}
+} // namespace astro    

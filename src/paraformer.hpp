@@ -5,12 +5,12 @@
 
 namespace astro {
 
-class Paraformer {
+class ParaformerSTT {
 public:
-    Paraformer();
-    ~Paraformer();
+    ParaformerSTT();
+    ~ParaformerSTT();
 
-    void detect(const std::vector<float>& samples);
+    std::string transcribe(const std::vector<float>& samples);
 private:
     int m_sample_rate = 16000;
     const SherpaOnnxOfflineRecognizer *m_recognizer = nullptr;

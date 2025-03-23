@@ -1,6 +1,40 @@
 #include "audio_stream.hpp"
 
 
+#include <queue>
+#include <mutex>
+
+struct AudioData {
+    std::vector<float> samples;
+};
+
+class ThreadSafeQueue {
+public:
+    void push(const std::vector<float>& data) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_queue.push({data});
+    }
+
+    bool pop(AudioData& data) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (m_queue.empty()) {
+            return false;
+        }
+        data = m_queue.front();
+        m_queue.pop();
+        return true;
+    }
+
+    bool empty() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_queue.empty();
+    }
+
+private:
+    std::queue<AudioData> m_queue;
+    mutable std::mutex m_mutex;
+};
+
 namespace astro
 {
 
@@ -26,7 +60,10 @@ static int _pa_record_callback(
     */
 }
 
-AudioStream::AudioStream() : m_kws(16000) {
+
+AudioStream::AudioStream(std::shared_ptr<AudioQueue> audio_queue) :
+        m_audio_queue(audio_queue)
+{
     PaError err = Pa_Initialize();
     m_params.device = Pa_GetDefaultInputDevice();
     //if (params.device == paNoDevice) {
@@ -48,12 +85,7 @@ AudioStream::~AudioStream() {
 }
 
 int AudioStream::OnRecord(const std::vector<float>& samples) {
-    std::vector<float> va_samples;
-
-    if (m_vad.detect(samples, va_samples)) {
-        m_kws.detect(va_samples);
-        m_asr.detect(va_samples);
-    }
+    m_audio_queue->push({samples, 16000});
     return paContinue;
 }
 

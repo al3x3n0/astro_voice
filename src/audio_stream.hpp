@@ -8,12 +8,13 @@
 #include "kwspotter.hpp"
 #include "vad.hpp"
 #include "paraformer.hpp"
+#include "audio_queue.hpp"
 
 namespace astro {
 
 class AudioStream {
 public:
-    AudioStream();
+    AudioStream(std::shared_ptr<AudioQueue> audio_queue);
     ~AudioStream();
 
     void start();
@@ -24,9 +25,7 @@ private:
     int m_frameSize = 1280;
     PaStreamParameters m_params;
     PaStream* m_stream = nullptr;
-    KWSpotter m_kws;
-    VoiceActivityDetector m_vad;
-    Paraformer m_asr;
+    std::shared_ptr<AudioQueue> m_audio_queue;
 };
 
 }

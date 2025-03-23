@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 project(astro VERSION 0.1)
 
-include("cmake/rapidjson.cmake")
+include("cmake/nlohmann.cmake")
 include("cmake/cpr.cmake")
 include("cmake/sherpa-onnx.cmake")
 
@@ -12,6 +12,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -g -pthread")
 include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${json_SOURCE_DIR}/include"
+    "${cpr_SOURCE_DIR}/include"
+    "${cpr_BINARY_DIR}/cpr_generated_includes"
     "${portaudio_SOURCE_DIR}/include"
     "${sherpa_onnx_SOURCE_DIR}"
 )
@@ -27,6 +30,9 @@ add_library(astro STATIC
     src/paraformer.cpp
     src/kwspotter.cpp
     src/vad.cpp
+    src/astro_client.cpp
+    src/player.cpp
+    src/pipe.cpp
 )
 
 add_executable(astro-bin src/main.cpp)
