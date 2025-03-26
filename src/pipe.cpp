@@ -10,24 +10,36 @@
 #include "paraformer.hpp"
 #include "astro_client.hpp"
 #include "pipe.hpp"
-
+#include "player.hpp"
+#include "ws_client.hpp"
 
 namespace astro {
 
-VoicePipeline::VoicePipeline(const std::string& astro_url,
+VoicePipeline::VoicePipeline(
         std::shared_ptr<AudioQueue> audio_queue,
         std::shared_ptr<VoiceActivityDetector> vad_,
         std::shared_ptr<KWSpotter> kws_,
         std::shared_ptr<ParaformerSTT> stt_,
-        std::shared_ptr<AstroBackendClient> astro_client_) 
+        std::shared_ptr<AstroBackendClient> astro_client_,
+        std::shared_ptr<WSClient> ws_client_) 
     : m_audio_queue(audio_queue)
     , vad(vad_)
     , kws(kws_)
     , stt(stt_)
-    , astro_client(astro_client_) {
+    , astro_client(astro_client_)
+    , ws_client(ws_client_) {
+    player = std::make_shared<AudioPlayer>();
 }
 
 void VoicePipeline::start() {
+    ws_client->connect(
+        [this](const std::string& text) {
+            this->on_text(text);
+        },
+        [this](const std::vector<uint8_t>& audio) {
+            this->on_audio(audio);
+        }
+    );
     m_processing_thread = std::thread(&VoicePipeline::run_processing_thread, this);
 }
 
@@ -91,8 +103,12 @@ void VoicePipeline::process_audio(const std::vector<float>& audio_buffer) {
                 if (!text.empty()) {
                     try {
                         printf("Sending text to astro: %s\n", text.c_str());
-                        //std::string response = astro_client->send_askie_text(text);
-                        // Response handling can be added here
+                        ws_client->send_message(text);
+                        //auto response = astro_client->send_askie_text(text);
+                        //printf("Astro response: %s\n", response.full_text.c_str());
+
+                        //player->play(response.audio);
+                        //printf("Playing audio\n");
                     } catch (const std::exception& e) {
                         // Handle errors appropriately
                     }
@@ -105,5 +121,22 @@ void VoicePipeline::process_audio(const std::vector<float>& audio_buffer) {
         }
     }
 }
+
+void VoicePipeline::on_text(const std::string& text) {
+    printf("Received text from server: %s\n", text.c_str());
+}
+
+void VoicePipeline::on_audio(const std::vector<uint8_t>& audio) {
+    printf("Received audio from server\n");
+    try {        
+        if (!audio.empty()) {
+            player->play(audio);
+            printf("Playing audio from websocket message\n");
+        }
+    } catch (const std::exception& e) {
+        printf("Error processing websocket message: %s\n", e.what());
+    }
+}
+
 
 } // namespace astro

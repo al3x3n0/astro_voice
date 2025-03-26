@@ -15,6 +15,8 @@ class VoiceActivityDetector;
 class KWSpotter;
 class ParaformerSTT;
 class AstroBackendClient;
+class AudioPlayer;
+class WSClient;
 
 enum class PipelineState {
     WAITING_FOR_KEYWORD,
@@ -29,16 +31,19 @@ public:
         std::vector<float> transcription_buffer;
     };
 
-    VoicePipeline(const std::string& astro_url,
-                    std::shared_ptr<AudioQueue> audio_queue,
+    VoicePipeline(std::shared_ptr<AudioQueue> audio_queue,
                     std::shared_ptr<VoiceActivityDetector> vad_,
                     std::shared_ptr<KWSpotter> kws_,
                     std::shared_ptr<ParaformerSTT> stt_,
-                    std::shared_ptr<AstroBackendClient> astro_client_);
+                    std::shared_ptr<AstroBackendClient> astro_client_,
+                    std::shared_ptr<WSClient> ws_client_);
 
     void start();
     void run_processing_thread();
     void stop();
+
+    void on_text(const std::string& text);
+    void on_audio(const std::vector<uint8_t>& audio);
 
 private:
     void process_audio(const std::vector<float>& audio_buffer);
@@ -47,6 +52,8 @@ private:
     std::shared_ptr<KWSpotter> kws;
     std::shared_ptr<ParaformerSTT> stt;
     std::shared_ptr<AstroBackendClient> astro_client;
+    std::shared_ptr<WSClient> ws_client;
+    std::shared_ptr<AudioPlayer> player;
 
     std::shared_ptr<AudioQueue> m_audio_queue;
     std::mutex m_mutex;

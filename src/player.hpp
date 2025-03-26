@@ -22,11 +22,7 @@ private:
 public:
     AudioPlayer();
     ~AudioPlayer();
-
-    void loadAudio(const std::vector<float>& data);
-    void play();
-    void stop();
-    bool playing() const;
+    void play(const std::vector<uint8_t>& wavData);
 };
 
 } // namespace astro

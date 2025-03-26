@@ -1,8 +1,10 @@
 #include "astro_client.hpp"
+#include "base64.hpp"
 
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
+
 
 namespace astro {
 
@@ -11,10 +13,10 @@ using json = nlohmann::json;
 
 AstroBackendClient::AstroBackendClient(const std::string& url) : base_url(url) {}
 
-std::string AstroBackendClient::send_askie_text(const std::string& text) {
+AstroResponse AstroBackendClient::send_askie_text(const std::string& text) {
     // Create JSON payload
     json payload;
-    payload["text"] = text;
+    payload["script"] = text;
 
     // Send POST request
     cpr::Response response = cpr::Post(
@@ -34,11 +36,13 @@ std::string AstroBackendClient::send_askie_text(const std::string& text) {
         json response_json = json::parse(response.text);
         
         // Check if response contains text field
-        if (!response_json.contains("text")) {
+        if (!response_json.contains("full_text")) {
             throw std::runtime_error("Response JSON does not contain 'text' field");
         }
 
-        return response_json["text"].get<std::string>();
+        auto full_text = response_json["full_text"].get<std::string>();
+        printf("full_text: %s\n", full_text.c_str());
+        return {full_text, base64_decode(response_json["audio_base64"].get<std::string>())};
     } catch (const json::parse_error& e) {
         throw std::runtime_error("Failed to parse response JSON: " + std::string(e.what()));
     }
