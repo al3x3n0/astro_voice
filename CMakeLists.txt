@@ -55,6 +55,8 @@ add_library(astro STATIC
     src/player.cpp
     src/pipe.cpp
     src/ws_client.cpp
+    src/ws_client_factory.cpp
+    src/tts.cpp
 )
 
 add_executable(astro-bin src/main.cpp)

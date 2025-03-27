@@ -6,7 +6,7 @@
 #include "paraformer.hpp"
 #include "audio_queue.hpp"
 #include "ws_client.hpp"
-
+#include "ws_client_factory.hpp"
 
 int main(int argc, char **argv) {
 
@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     const std::string astro_url = "https://llm-server-8kx0.onrender.com/stream_script";
     const std::string ws_url = "wss://llm-server-8kx0.onrender.com/ws_stream_script";
 
-    auto ws_client = std::make_shared<astro::WSClient>(ws_url);
+    auto ws_client_factory = std::make_shared<astro::WSClientFactory>(ws_url);
 
     astro::VoicePipeline pipeline(
         audio_queue,
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
         std::make_shared<astro::KWSpotter>(16000),
         std::make_shared<astro::ParaformerSTT>(),
         std::make_shared<astro::AstroBackendClient>(astro_url),
-        ws_client);
+        ws_client_factory);
 
     pipeline.start();
     as.start();

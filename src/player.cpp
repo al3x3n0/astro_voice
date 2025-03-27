@@ -20,6 +20,7 @@ int AudioPlayer::paCallback(const void* inputBuffer, void* outputBuffer,
     for (unsigned int i = 0; i < framesPerBuffer; i++) {
         if (player->position >= player->audioData.size()) {
             player->isPlaying = false;
+            player->position = 0;
             return paComplete;
         }
         out[i] = player->audioData[player->position++];
@@ -50,19 +51,28 @@ void AudioPlayer::play(const std::vector<uint8_t>& wavData) {
     for (size_t i = 0; i < (wavData.size() - 44) / 2; i++) {
         newSamples.push_back(samples[i] / 16384.0f);
     }
+    play(newSamples);
+}
 
+void AudioPlayer::play(const std::vector<float>& samples) {
     // If currently playing, append to existing audio
     if (isPlaying) {
+        printf("Appending to existing audio\n");
         // Keep remaining unplayed audio
         std::vector<float> remainingAudio(audioData.begin() + position, audioData.end());
         // Append new samples
-        remainingAudio.insert(remainingAudio.end(), newSamples.begin(), newSamples.end());
+        remainingAudio.insert(remainingAudio.end(), samples.begin(), samples.end());
         audioData = remainingAudio;
         position = 0;
     } else {
+        printf("Starting fresh with new samples\n");
         // Start fresh with new samples
-        audioData = newSamples;
+        audioData = samples;
         position = 0;
+        if (stream) {
+            Pa_CloseStream(stream);
+            stream = nullptr;
+        }
     }
 
     // Initialize stream if needed

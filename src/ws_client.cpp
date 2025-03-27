@@ -62,6 +62,10 @@ websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context>  WSClient::on
     return ctx;
 }
 
+bool WSClient::is_connected() const {
+    return connected_;
+}
+
 void WSClient::send_message(const std::string& script) {
     if (!connection_) {
         throw std::runtime_error("Not connected");
@@ -73,13 +77,15 @@ void WSClient::send_message(const std::string& script) {
 
     websocketpp::lib::error_code ec;
     client_.send(connection_->get_handle(), message.dump(), websocketpp::frame::opcode::text, ec);
+    printf("Sent message: %s\n", message.dump().c_str());
     if (ec) {
         throw std::runtime_error("Failed to send message: " + ec.message());
     }
 }
 
 void WSClient::disconnect() {
-    if (connection_) {
+    printf("Disconnecting\n");
+    if (connected_ && connection_) {
         connection_->close(websocketpp::close::status::normal, "Closing connection");
     }
     if (client_thread_.joinable()) {
@@ -94,29 +100,34 @@ WSClient::~WSClient() {
 void WSClient::on_message(websocketpp::connection_hdl hdl, Client::message_ptr msg) {
     try {
         auto j = json::parse(msg->get_payload());
-        //printf("Received message: %s\n", msg->get_payload().c_str());
-        
+        printf("Received message: %s\n", msg->get_payload().c_str());
+
         std::string type = j["type"];
         std::vector<uint8_t> audio;
         if (type == "text") {
-            text_callback_(j["text"]);
+            std::string content = j["content"];
+            if (!content.empty()) {
+                text_callback_(content);
+            }
         } else if (type == "audio") {
             std::string audio_base64 = j["chunk"];
             // Convert base64 to binary
             audio = base64_decode(audio_base64);
-            audio_callback_(audio);
+            //audio_callback_(audio);
         }
     } catch (const std::exception& e) {
-        // Handle parsing errors
+        printf("Error parsing message: %s\n", e.what());
     }
 }
 
 void WSClient::on_open(websocketpp::connection_hdl hdl) {
-    // Connection established
+    printf("Connection established\n");// Connection established
+    connected_ = true;
 }
 
 void WSClient::on_close(websocketpp::connection_hdl hdl) {
-    // Connection closed
+    printf("Connection closed\n");// Connection closed
+    connected_ = false;
 }
 
 } // namespace astro

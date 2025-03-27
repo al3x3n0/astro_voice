@@ -21,7 +21,7 @@ public:
     void connect(TextMessageCallback text_callback, AudioMessageCallback audio_callback);
     void send_message(const std::string& script);
     void disconnect();
-    
+    bool is_connected() const;
 private:
     using Client = websocketpp::client<websocketpp::config::asio_tls_client>;
     using ConnectionPtr = Client::connection_ptr;
@@ -32,6 +32,7 @@ private:
 
     websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context> on_tls_init(websocketpp::connection_hdl hdl);
 
+    bool connected_ = false;
     Client client_;
     ConnectionPtr connection_;
     std::string url_;

@@ -22,6 +22,7 @@ private:
 public:
     AudioPlayer();
     ~AudioPlayer();
+    void play(const std::vector<float>& samples);
     void play(const std::vector<uint8_t>& wavData);
 };
 
