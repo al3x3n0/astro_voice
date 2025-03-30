@@ -6,10 +6,10 @@
 
 namespace astro {
 
-class ParaformerSTT : public STTBase {
+class ZipformerSTT : public STTBase {
 public:
-    ParaformerSTT();
-    ~ParaformerSTT();
+    ZipformerSTT();
+    ~ZipformerSTT();
 
     std::string transcribe(const std::vector<float>& samples);
 private:

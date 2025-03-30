@@ -30,13 +30,18 @@ VoiceActivityDetector::~VoiceActivityDetector() {
 }
 
 bool VoiceActivityDetector::detect(const std::vector<float>& samples, std::vector<float>& out) {
-    
+    // Process audio in window_size chunks
+    size_t offset = 0;
+    while (offset + m_window_size <= samples.size()) {
+        SherpaOnnxVoiceActivityDetectorAcceptWaveform(m_vad, 
+            samples.data() + offset, m_window_size);
+        offset += m_window_size;
+    }
 
-    if (true/*i + m_window_size < wave->num_samples*/) {
-        SherpaOnnxVoiceActivityDetectorAcceptWaveform(m_vad, samples.data(), samples.size());
-    } else {
-      SherpaOnnxVoiceActivityDetectorFlush(m_vad);
-      //is_eof = 1;
+    // Process any remaining samples
+    if (offset < samples.size()) {
+        SherpaOnnxVoiceActivityDetectorAcceptWaveform(m_vad,
+            samples.data() + offset, samples.size() - offset);
     }
 
     while (!SherpaOnnxVoiceActivityDetectorEmpty(m_vad)) {

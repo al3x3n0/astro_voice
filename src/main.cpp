@@ -4,6 +4,7 @@
 #include "vad.hpp"
 #include "kwspotter.hpp"
 #include "paraformer.hpp"
+#include "zipformer_stt.hpp"
 #include "audio_queue.hpp"
 #include "ws_client.hpp"
 #include "ws_client_factory.hpp"
@@ -22,7 +23,7 @@ int main(int argc, char **argv) {
         audio_queue,
         std::make_shared<astro::VoiceActivityDetector>(),
         std::make_shared<astro::KWSpotter>(16000),
-        std::make_shared<astro::ParaformerSTT>(),
+        std::make_shared<astro::ZipformerSTT>(),
         std::make_shared<astro::AstroBackendClient>(astro_url),
         ws_client_factory);
 

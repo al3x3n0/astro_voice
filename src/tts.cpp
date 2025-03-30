@@ -9,19 +9,27 @@ using namespace std::placeholders;
 TTS::TTS() {
     SherpaOnnxOfflineTtsConfig config;
     memset(&config, 0, sizeof(config));
-    config.model.matcha.acoustic_model =
+    /*
+        config.model.matcha.acoustic_model =
         "./matcha-icefall-zh-baker/model-steps-3.onnx";
+        config.model.matcha.vocoder = "./vocos-22khz-univ.onnx";
+        config.model.matcha.lexicon = "./matcha-icefall-zh-baker/lexicon.txt";
+        config.model.matcha.tokens = "./matcha-icefall-zh-baker/tokens.txt";
+        config.model.matcha.dict_dir = "./matcha-icefall-zh-baker/dict";
+    */
+    config.model.matcha.acoustic_model = "./matcha-icefall-en_US-ljspeech/model-steps-3.onnx";
     config.model.matcha.vocoder = "./vocos-22khz-univ.onnx";
-    config.model.matcha.lexicon = "./matcha-icefall-zh-baker/lexicon.txt";
-    config.model.matcha.tokens = "./matcha-icefall-zh-baker/tokens.txt";
-    config.model.matcha.dict_dir = "./matcha-icefall-zh-baker/dict";
+    config.model.matcha.tokens = "./matcha-icefall-en_US-ljspeech/tokens.txt";
+    config.model.matcha.data_dir = "./matcha-icefall-en_US-ljspeech/espeak-ng-data";
+
     config.model.num_threads = 1;
 
     // If you don't want to see debug messages, please set it to 0
     config.model.debug = 1;
 
     // clang-format off
-    config.rule_fsts = "./matcha-icefall-zh-baker/phone.fst,./matcha-icefall-zh-baker/date.fst,./matcha-icefall-zh-baker/number.fst";
+    //config.rule_fsts = "./matcha-icefall-en_US-ljspeech/phone.fst,./matcha-icefall-en_US-ljspeech/date.fst,./matcha-icefall-en_US-ljspeech/number.fst";
+    //config.rule_fsts = "./matcha-icefall-zh-baker/phone.fst,./matcha-icefall-zh-baker/date.fst,./matcha-icefall-zh-baker/number.fst";
     // clang-format on
 
     m_tts = SherpaOnnxCreateOfflineTts(&config);

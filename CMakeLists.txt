@@ -57,6 +57,7 @@ add_library(astro STATIC
     src/ws_client.cpp
     src/ws_client_factory.cpp
     src/tts.cpp
+    src/zipformer_stt.cpp
 )
 
 add_executable(astro-bin src/main.cpp)

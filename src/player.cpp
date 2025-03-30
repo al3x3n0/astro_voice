@@ -81,7 +81,7 @@ void AudioPlayer::play(const std::vector<float>& samples) {
                                          0,          // no input channels
                                          1,          // mono output
                                          paFloat32,  // sample format
-                                         16000,      // sample rate
+                                         22050,      // sample rate
                                          256,        // frames per buffer
                                          paCallback,
                                          this);

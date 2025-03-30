@@ -37,7 +37,7 @@ public:
     VoicePipeline(std::shared_ptr<AudioQueue> audio_queue,
                     std::shared_ptr<VoiceActivityDetector> vad_,
                     std::shared_ptr<KWSpotter> kws_,
-                    std::shared_ptr<ParaformerSTT> stt_,
+                    std::shared_ptr<STTBase> stt_,
                     std::shared_ptr<AstroBackendClient> astro_client_,
                     std::shared_ptr<WSClientFactory> ws_client_factory_);
 
@@ -54,7 +54,7 @@ private:
 
     std::shared_ptr<VoiceActivityDetector> vad;
     std::shared_ptr<KWSpotter> kws;
-    std::shared_ptr<ParaformerSTT> stt;
+    std::shared_ptr<STTBase> stt;
     std::shared_ptr<AstroBackendClient> astro_client;
 
     std::shared_ptr<WSClient> ws_client = nullptr;

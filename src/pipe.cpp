@@ -19,7 +19,7 @@ VoicePipeline::VoicePipeline(
         std::shared_ptr<AudioQueue> audio_queue,
         std::shared_ptr<VoiceActivityDetector> vad_,
         std::shared_ptr<KWSpotter> kws_,
-        std::shared_ptr<ParaformerSTT> stt_,
+        std::shared_ptr<STTBase> stt_,
         std::shared_ptr<AstroBackendClient> astro_client_,
         std::shared_ptr<WSClientFactory> ws_client_factory_) 
     : m_audio_queue(audio_queue)
@@ -84,7 +84,6 @@ void VoicePipeline::process_audio(const std::vector<float>& audio_buffer) {
             }
 
             if (kws->detect(va_samples)) {
-                printf("Keyword detected\n");
                 state.state = PipelineState::TRANSCRIBING;
                 state.transcription_buffer.insert(
                     state.transcription_buffer.end(),

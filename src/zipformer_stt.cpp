@@ -1,14 +1,14 @@
-#include "paraformer.hpp"
+#include "zipformer_stt.hpp"
 
 namespace astro {
 
-ParaformerSTT::ParaformerSTT() {
-    
-    // Paraformer config
-    SherpaOnnxOfflineParaformerModelConfig paraformer_config;
-    memset(&paraformer_config, 0, sizeof(paraformer_config));
-    paraformer_config.model = "sherpa-onnx-paraformer-zh-small-2024-03-09/model.int8.onnx";
-
+ZipformerSTT::ZipformerSTT() {
+    // Zipformer config
+    SherpaOnnxOfflineTransducerModelConfig zipformer_config;
+    memset(&zipformer_config, 0, sizeof(zipformer_config));
+    zipformer_config.encoder = "sherpa-onnx-zipformer-gigaspeech-2023-12-12/encoder-epoch-30-avg-1.int8.onnx";
+    zipformer_config.decoder = "sherpa-onnx-zipformer-gigaspeech-2023-12-12/decoder-epoch-30-avg-1.int8.onnx";
+    zipformer_config.joiner = "sherpa-onnx-zipformer-gigaspeech-2023-12-12/joiner-epoch-30-avg-1.int8.onnx";
 
     // Offline model config
     SherpaOnnxOfflineModelConfig offline_model_config;
@@ -16,8 +16,8 @@ ParaformerSTT::ParaformerSTT() {
     offline_model_config.debug = 1;
     offline_model_config.num_threads = 1;
     offline_model_config.provider = "cpu";
-    offline_model_config.tokens = "sherpa-onnx-paraformer-zh-small-2024-03-09/tokens.txt";
-    offline_model_config.paraformer = paraformer_config;
+    offline_model_config.tokens = "sherpa-onnx-zipformer-gigaspeech-2023-12-12/tokens.txt";
+    offline_model_config.transducer = zipformer_config;
 
     // Recognizer config
     SherpaOnnxOfflineRecognizerConfig recognizer_config;
@@ -28,13 +28,13 @@ ParaformerSTT::ParaformerSTT() {
     m_recognizer = SherpaOnnxCreateOfflineRecognizer(&recognizer_config);
 }
 
-ParaformerSTT::~ParaformerSTT() {
+ZipformerSTT::~ZipformerSTT() {
     if (m_recognizer) {
         SherpaOnnxDestroyOfflineRecognizer(m_recognizer);
     }
 }
 
-std::string ParaformerSTT::transcribe(const std::vector<float>& samples) {
+std::string ZipformerSTT::transcribe(const std::vector<float>& samples) {
     auto stream = SherpaOnnxCreateOfflineStream(m_recognizer);
     SherpaOnnxAcceptWaveformOffline(stream, m_sample_rate, samples.data(), samples.size());
     SherpaOnnxDecodeOfflineStream(m_recognizer, stream);
@@ -49,4 +49,4 @@ std::string ParaformerSTT::transcribe(const std::vector<float>& samples) {
     return text;
 }
 
-} // namespace astro    
+} // namespace astro
