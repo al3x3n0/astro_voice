@@ -136,8 +136,8 @@ void VoicePipeline::process_audio(const std::vector<float>& audio_buffer) {
 
 void VoicePipeline::on_text(const std::string& text) {
     printf("Received text from server: %s\n", text.c_str());
-    AudioData data = tts->speak(text);
-    player->play(data.samples);
+    //->speak(text);
+    //player->play(data.samples);
 }
 
 void VoicePipeline::on_audio(const std::vector<uint8_t>& audio) {

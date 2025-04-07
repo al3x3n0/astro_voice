@@ -45,6 +45,7 @@ link_directories(
 )
 
 add_library(astro STATIC
+    src/config.cpp
     src/audio_stream.cpp
     src/base64.cpp
     src/sensevoice.cpp
@@ -62,3 +63,24 @@ add_library(astro STATIC
 
 add_executable(astro-bin src/main.cpp)
 target_link_libraries(astro-bin PUBLIC astro PRIVATE onnxruntime sherpa-onnx-c-api portaudio cpr::cpr OpenSSL::SSL OpenSSL::Crypto)
+
+# Add cxxopts for command line parsing
+FetchContent_Declare(cxxopts
+    GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
+    GIT_TAG v3.1.1
+)
+FetchContent_MakeAvailable(cxxopts)
+
+# Add configuration files
+set(CONFIG_SOURCES
+    src/config.cpp
+)
+
+# Add configuration header to include path
+target_include_directories(astro PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${cxxopts_SOURCE_DIR}/include
+)
+
+# Link nlohmann/json to astro target
+target_link_libraries(astro PRIVATE nlohmann_json::nlohmann_json cxxopts::cxxopts)

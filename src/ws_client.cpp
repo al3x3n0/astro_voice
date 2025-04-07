@@ -113,7 +113,7 @@ void WSClient::on_message(websocketpp::connection_hdl hdl, Client::message_ptr m
             std::string audio_base64 = j["chunk"];
             // Convert base64 to binary
             audio = base64_decode(audio_base64);
-            //audio_callback_(audio);
+            audio_callback_(audio);
         }
     } catch (const std::exception& e) {
         printf("Error parsing message: %s\n", e.what());

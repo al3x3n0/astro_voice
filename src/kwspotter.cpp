@@ -1,47 +1,45 @@
 #include "kwspotter.hpp"
+#include "config.hpp"
 #include <iostream>
-
 
 namespace astro {
 
 KWSpotter::KWSpotter(int sample_rate) :
     m_sample_rate (sample_rate)
 {
-    SherpaOnnxKeywordSpotterConfig config;
-    memset(&config, 0, sizeof(config));
-    config.model_config.transducer.encoder =
-        "./sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01/"
-        //"./sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01-mobile/"
-        "encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx";
-
-    config.model_config.transducer.decoder =
-        "./sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01/"
-        //"./sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01-mobile/"
-        "decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx";
-
-    config.model_config.transducer.joiner =
-        "./sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01/"
-        //"./sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01-mobile/"
-        "joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx";
-
-    config.model_config.tokens =
-        "./sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01/"
-        //"./sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01-mobile/"
-        "tokens.txt";
-
-    config.model_config.provider = "cpu";
-    config.model_config.num_threads = 1;
-    config.model_config.debug = 1;
-
-    config.keywords_file =
-        //"./sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01/"
-        //"./sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01-mobile/"
-        //"test_wavs/test_keywords.txt";
-        "output.txt";
-
-    m_kws = SherpaOnnxCreateKeywordSpotter(&config);
+    auto& config = Config::getInstance();
+    std::string model_path = config.getKwsModelPath();
     
-    m_stream = SherpaOnnxCreateKeywordStreamWithKeywords(m_kws, "▁HE LL O ▁AS K");
+    SherpaOnnxKeywordSpotterConfig kws_config;
+    memset(&kws_config, 0, sizeof(kws_config));
+    
+    // Set model paths from config
+    kws_config.model_config.transducer.encoder =
+        (model_path + "/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx").c_str();
+
+    kws_config.model_config.transducer.decoder =
+        (model_path + "/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx").c_str();
+
+    kws_config.model_config.transducer.joiner =
+        (model_path + "/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx").c_str();
+
+    kws_config.model_config.tokens =
+        (model_path + "/tokens.txt").c_str();
+
+    // Set model parameters
+    kws_config.model_config.provider = "cpu";
+    kws_config.model_config.num_threads = 1;
+    kws_config.model_config.debug = 1;
+
+    // Set keywords file path
+    kws_config.keywords_file = (config.getKeywordsOutputDir() + "/output.txt").c_str();
+
+    m_kws = SherpaOnnxCreateKeywordSpotter(&kws_config);
+    
+    // Use default threshold and boost from config
+    m_stream = SherpaOnnxCreateKeywordStreamWithKeywords(
+        m_kws, 
+        "▁HE LL O ▁AS K");
 }
   
 KWSpotter::~KWSpotter() {
