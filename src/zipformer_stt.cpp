@@ -7,12 +7,18 @@ ZipformerSTT::ZipformerSTT() {
     auto& config = Config::getInstance();
     std::string model_path = config.getAsrEnModelPath();
     
+    // Store configuration paths
+    m_encoder_path = model_path + "/encoder-epoch-30-avg-1.int8.onnx";
+    m_decoder_path = model_path + "/decoder-epoch-30-avg-1.int8.onnx";
+    m_joiner_path = model_path + "/joiner-epoch-30-avg-1.int8.onnx";
+    m_tokens_path = model_path + "/tokens.txt";
+    
     // Zipformer config
     SherpaOnnxOfflineTransducerModelConfig zipformer_config;
     memset(&zipformer_config, 0, sizeof(zipformer_config));
-    zipformer_config.encoder = (model_path + "/encoder-epoch-30-avg-1.int8.onnx").c_str();
-    zipformer_config.decoder = (model_path + "/decoder-epoch-30-avg-1.int8.onnx").c_str();
-    zipformer_config.joiner = (model_path + "/joiner-epoch-30-avg-1.int8.onnx").c_str();
+    zipformer_config.encoder = m_encoder_path.c_str();
+    zipformer_config.decoder = m_decoder_path.c_str();
+    zipformer_config.joiner = m_joiner_path.c_str();
 
     // Offline model config
     SherpaOnnxOfflineModelConfig offline_model_config;
@@ -20,7 +26,7 @@ ZipformerSTT::ZipformerSTT() {
     offline_model_config.debug = 1;
     offline_model_config.num_threads = 1;
     offline_model_config.provider = "cpu";
-    offline_model_config.tokens = (model_path + "/tokens.txt").c_str();
+    offline_model_config.tokens = m_tokens_path.c_str();
     offline_model_config.transducer = zipformer_config;
 
     // Recognizer config

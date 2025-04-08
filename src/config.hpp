@@ -2,6 +2,8 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
+#include <vector>
+#include <stdexcept>
 
 namespace astro {
 
@@ -11,6 +13,7 @@ public:
     
     void loadFromFile(const std::string& configPath);
     void loadDefaults() const;
+    void checkFiles() const;
 
     // Getters
     std::string getVadModelPath() const;
@@ -38,6 +41,9 @@ private:
     Config() = default;
     Config(const Config&) = delete;
     Config& operator=(const Config&) = delete;
+
+    void checkFile(const std::string& path, const std::string& description) const;
+    void checkDirectory(const std::string& path, const std::string& description) const;
 
     std::string configPath_;
     mutable nlohmann::json config_;

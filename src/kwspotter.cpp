@@ -10,21 +10,21 @@ KWSpotter::KWSpotter(int sample_rate) :
     auto& config = Config::getInstance();
     std::string model_path = config.getKwsModelPath();
     
+    // Store configuration paths
+    m_encoder_path = model_path + "/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx";
+    m_decoder_path = model_path + "/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx";
+    m_joiner_path = model_path + "/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx";
+    m_tokens_path = model_path + "/tokens.txt";
+    m_keywords_file = config.getKeywordsOutputDir() + "/output.txt";
+    
     SherpaOnnxKeywordSpotterConfig kws_config;
     memset(&kws_config, 0, sizeof(kws_config));
     
-    // Set model paths from config
-    kws_config.model_config.transducer.encoder =
-        (model_path + "/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx").c_str();
-
-    kws_config.model_config.transducer.decoder =
-        (model_path + "/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx").c_str();
-
-    kws_config.model_config.transducer.joiner =
-        (model_path + "/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx").c_str();
-
-    kws_config.model_config.tokens =
-        (model_path + "/tokens.txt").c_str();
+    // Set model paths from member variables
+    kws_config.model_config.transducer.encoder = m_encoder_path.c_str();
+    kws_config.model_config.transducer.decoder = m_decoder_path.c_str();
+    kws_config.model_config.transducer.joiner = m_joiner_path.c_str();
+    kws_config.model_config.tokens = m_tokens_path.c_str();
 
     // Set model parameters
     kws_config.model_config.provider = "cpu";
@@ -32,8 +32,10 @@ KWSpotter::KWSpotter(int sample_rate) :
     kws_config.model_config.debug = 1;
 
     // Set keywords file path
-    kws_config.keywords_file = (config.getKeywordsOutputDir() + "/output.txt").c_str();
-
+    kws_config.keywords_file = m_keywords_file.c_str();
+    printf("Keywords file: %s\n", kws_config.keywords_file);
+    
+    // Set keywords
     m_kws = SherpaOnnxCreateKeywordSpotter(&kws_config);
     
     // Use default threshold and boost from config
@@ -66,5 +68,5 @@ bool KWSpotter::detect(const std::vector<float>& samples) {
     return false;
 }
 
-}
+} // namespace astro
  

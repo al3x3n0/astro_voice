@@ -9,14 +9,20 @@ using namespace std::placeholders;
 TTS::TTS() {
     auto& config = Config::getInstance();
     
+    // Store configuration paths
+    m_acoustic_model_path = config.getTtsModelPath() + "/model-steps-3.onnx";
+    m_vocoder_path = config.getTtsVocoderPath();
+    m_tokens_path = config.getTtsTokensPath();
+    m_data_dir = config.getTtsDataDir();
+    
     SherpaOnnxOfflineTtsConfig tts_config;
     memset(&tts_config, 0, sizeof(tts_config));
     
-    // Set model paths from config
-    tts_config.model.matcha.acoustic_model = (config.getTtsModelPath() + "/model-steps-3.onnx").c_str();
-    tts_config.model.matcha.vocoder = config.getTtsVocoderPath().c_str();
-    tts_config.model.matcha.tokens = config.getTtsTokensPath().c_str();
-    tts_config.model.matcha.data_dir = config.getTtsDataDir().c_str();
+    // Set model paths from member variables
+    tts_config.model.matcha.acoustic_model = m_acoustic_model_path.c_str();
+    tts_config.model.matcha.vocoder = m_vocoder_path.c_str();
+    tts_config.model.matcha.tokens = m_tokens_path.c_str();
+    tts_config.model.matcha.data_dir = m_data_dir.c_str();
 
     // Set model parameters
     tts_config.model.num_threads = config.getTtsNumThreads();

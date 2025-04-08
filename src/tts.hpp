@@ -14,6 +14,12 @@ public:
     AudioData speak(const std::string& text);
 private:
     const SherpaOnnxOfflineTts *m_tts = nullptr;
+
+    // Configuration strings
+    std::string m_acoustic_model_path;
+    std::string m_vocoder_path;
+    std::string m_tokens_path;
+    std::string m_data_dir;
 };
 
 } // namespace astro

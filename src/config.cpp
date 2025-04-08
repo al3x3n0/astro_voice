@@ -2,6 +2,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <filesystem>
+#include <iostream>
 
 namespace astro {
 
@@ -69,6 +70,50 @@ void Config::loadDefaults() const {
             {"build_dir", cwd_str}
         };
     }
+}
+
+void Config::checkFile(const std::string& path, const std::string& description) const {
+    if (!std::filesystem::exists(path)) {
+        throw std::runtime_error(description + " file not found: " + path);
+    }
+}
+
+void Config::checkDirectory(const std::string& path, const std::string& description) const {
+    if (!std::filesystem::exists(path)) {
+        throw std::runtime_error(description + " directory not found: " + path);
+    }
+}
+
+void Config::checkFiles() const {
+    loadDefaults();
+
+    // Check VAD model
+    checkFile(getVadModelPath(), "VAD model");
+
+    // Check KWS model files
+    std::string kws_path = getKwsModelPath();
+    checkDirectory(kws_path, "KWS model directory");
+    checkFile(kws_path + "/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx", "KWS encoder model");
+    checkFile(kws_path + "/decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx", "KWS decoder model");
+    checkFile(kws_path + "/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx", "KWS joiner model");
+    checkFile(kws_path + "/tokens.txt", "KWS tokens file");
+
+    // Check ASR model files
+    std::string asr_en_path = getAsrEnModelPath();
+    checkDirectory(asr_en_path, "English ASR model directory");
+    checkFile(asr_en_path + "/encoder-epoch-30-avg-1.int8.onnx", "English ASR encoder model");
+    checkFile(asr_en_path + "/decoder-epoch-30-avg-1.int8.onnx", "English ASR decoder model");
+    checkFile(asr_en_path + "/joiner-epoch-30-avg-1.int8.onnx", "English ASR joiner model");
+    checkFile(asr_en_path + "/tokens.txt", "English ASR tokens file");
+
+    // Check TTS model files
+    checkFile(getTtsModelPath() + "/model-steps-3.onnx", "TTS acoustic model");
+    checkFile(getTtsVocoderPath(), "TTS vocoder model");
+    checkFile(getTtsTokensPath(), "TTS tokens file");
+    checkDirectory(getTtsDataDir(), "TTS data directory");
+
+    // Check keywords directory
+    checkDirectory(getKeywordsOutputDir(), "Keywords output directory");
 }
 
 std::string Config::getVadModelPath() const {
